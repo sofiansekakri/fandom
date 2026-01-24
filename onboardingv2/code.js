@@ -16,10 +16,13 @@ mw.loader.using('mediawiki.api').then(() => {
 	
 	const onboardingSections = [
 		new OnboardingSection("Introduction", 'User:Liminalityyyyy/testing2'),
-		new OnboardingSection("Rules", 'The Transrooms')
+		new OnboardingSection("Rules", 'Backrooms_Freewriting_Wiki:Wiki_rules')
 	];
 
 	let section = 0;
+
+	let canContinue = false;
+	let continueTimer = 5;
 	
 	async function getPageContent(page) {
 		$.get('/wiki/' + page, function(html) {
@@ -50,22 +53,36 @@ mw.loader.using('mediawiki.api').then(() => {
 		$('.wiki-onboarding-text').append('Loading...');
 		loadSection(section);
 	}
+
+	function isFinalStep() {
+		return (section+1) == onboardingSections.length;
+	}
 	
 	function loadSection(sectionToLoad) {
 		const curSection = sectionToLoad+1;
 		getPageContent(onboardingSections[sectionToLoad].getPage());
 		$('.wiki-onboarding-title').text(onboardingSections[sectionToLoad].getTitle() + " (" + curSection + "/" + onboardingSections.length + ")");
 		
-		const buttonText = curSection == onboardingSections.length ? "Finish" : "Continue";
-		$('.wiki-onboarding-continue').text(buttonText);
+		updateContinueButton();
 	}
 	
 	init();
 
-	$(document).on('click', '.wiki-onboarding-continue', function() {
-		// section++;
-		// loadSection(section);
-		console.log("tes");
+	function updateContinueButton() {
+		const buttonText = isFinalStep() ? "Finish (" + continueTimer + "s)" : "Continue (" + continueTimer + "s)";
+		$('.wiki-onboarding-continue').text(buttonText);
+	}
+
+	$('.wiki-onboarding-container').on('click', '.wiki-onboarding-continue', function() {
+		if (canContinue) {
+			if (isFinalStep()) {
+				console.log("finished!");
+				return;
+			}
+			$('.wiki-onboarding-text').text('Loading...');
+			section++;
+			loadSection(section);
+		}
 	})
 	
 	importArticle({
