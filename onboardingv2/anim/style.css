@@ -1,0 +1,38 @@
+* {
+    margin: 0px;
+    --size: 60px;
+    --border-size: 5px;
+}
+
+.container {
+    position: relative;
+    width: calc(75px + var(--size));
+    height: 100px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.infinity::before, .infinity::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    margin-top: auto;
+    margin-bottom: auto;
+    left: 0;
+    width: var(--size);
+    height: calc(var(--size) / 1.05);
+    border-radius: 50px 50px 5px 50px;
+    border: solid var(--border-size) black;
+    transform: rotate(-45deg);
+    box-sizing: border-box
+    
+}
+
+.infinity::after {
+    left: auto;
+    right: 0;
+    border-radius: 50px 50px 50px 5px;
+    transform: rotate(45deg);
+}

@@ -1,22 +1,25 @@
 mw.loader.using('mediawiki.api').then(() => {
 	class OnboardingSection {
-		constructor(title, content) {
+		constructor(title, page) {
 			this.title = title;
-			this.content = content;
+			this.page = page;
 		}
 		
 		getTitle() {
 			return this.title;
 		}
 		
-		getContent() {
-			return this.content;
+		getPage() {
+			return this.page;
 		}
 	}
 	
 	const onboardingSections = [
-		new OnboardingSection("Introduction", getPageContent('The Transrooms'))
+		new OnboardingSection("Introduction", 'User:Liminalityyyyy/testing2'),
+		new OnboardingSection("Rules", 'The Transrooms')
 	];
+
+	let section = 0;
 	
 	async function getPageContent(page) {
 		$.get('/wiki/' + page, function(html) {
@@ -38,23 +41,32 @@ mw.loader.using('mediawiki.api').then(() => {
 				$('<div class="wiki-onboarding-text">'),
 				$('<div class="wiki-onboarding-footer">').append(
 					$('<div class="wiki-onboarding-title">'),
-					$('<button class="wiki-onboarding-continue">')
+					$('<button class="wiki-onboarding-continue">Continue</button>')
 				)
 			)
 		);
 		
 		$('.wiki-onboarding').append(onboardingDOM);
 		$('.wiki-onboarding-text').append('Loading...');
-		loadSection(0);
+		loadSection(section);
 	}
 	
 	function loadSection(sectionToLoad) {
-		onboardingSections[sectionToLoad].getContent()
-		$('.wiki-onboarding-title').append(onboardingSections[sectionToLoad].getTitle());
-		$('.wiki-onboarding-continue').append("Continue");
+		const curSection = sectionToLoad+1;
+		getPageContent(onboardingSections[sectionToLoad].getPage());
+		$('.wiki-onboarding-title').text(onboardingSections[sectionToLoad].getTitle() + " (" + curSection + "/" + onboardingSections.length + ")");
+		
+		const buttonText = curSection == onboardingSections.length ? "Finish" : "Continue";
+		$('.wiki-onboarding-continue').text(buttonText);
 	}
 	
 	init();
+
+	$(document).on('click', '.wiki-onboarding-continue', function() {
+		// section++;
+		// loadSection(section);
+		console.log("tes");
+	})
 	
 	importArticle({
 	  type: 'style',
