@@ -1,4 +1,4 @@
-mw.loader.using('mediawiki.api').then(() => {
+mw.loader.using('mediawiki.api').then(function() {
 	class OnboardingSection {
 		constructor(title, page) {
 			this.title = title;
