@@ -1,8 +1,9 @@
-mw.loader.using('mediawiki.api').then(function() {
+mw.loader.using('mediawiki.api').then(() => {
 	class OnboardingSection {
-		constructor(title, page) {
+		constructor(title, page, seconds) {
 			this.title = title;
 			this.page = page;
+			this.seconds = seconds;
 		}
 		
 		getTitle() {
@@ -12,18 +13,25 @@ mw.loader.using('mediawiki.api').then(function() {
 		getPage() {
 			return this.page;
 		}
+
+		getSeconds() {
+			return this.seconds;
+		}
 	}
-	
-	const onboardingSections = [
-		new OnboardingSection("Introduction", 'User:Liminalityyyyy/testing2'),
-		new OnboardingSection("Rules", 'Backrooms_Freewriting_Wiki:Wiki_rules')
-	];
 
 	let section = 0;
-
-	let canContinue = false;
-	let continueTimer = 5;
+	var wikiName = mw.config.get('wgSiteName');
+	var wikiNamespace = wikiName.replace(/ /g, '_');
 	
+	const onboardingSections = [
+		new OnboardingSection("Introduction", 'User:Liminalityyyyy/testing2', 10),
+		new OnboardingSection("Rules", 'User:Liminalityyyyy/rules', 20),
+		new OnboardingSection("Roles", 'User:Liminalityyyyy/testing3', 20),
+	];
+	// padding: 6px 0;
+	let seconds;
+	let canContinue = false;
+
 	async function getPageContent(page) {
 		$.get('/wiki/' + page, function(html) {
 			const content = $(html).find('.mw-parser-output');
@@ -62,14 +70,31 @@ mw.loader.using('mediawiki.api').then(function() {
 		const curSection = sectionToLoad+1;
 		getPageContent(onboardingSections[sectionToLoad].getPage());
 		$('.wiki-onboarding-title').text(onboardingSections[sectionToLoad].getTitle() + " (" + curSection + "/" + onboardingSections.length + ")");
-		
-		updateContinueButton();
+
+		seconds = onboardingSections[sectionToLoad].getSeconds();
+		canContinue = false;
+
+		const timer = setInterval(function() {
+			seconds--;
+			updateContinueButton(seconds);
+
+			if (seconds == 0) {
+				clearInterval(timer);
+				updateContinueButton(seconds);
+				seconds = onboardingSections[sectionToLoad].getSeconds();
+				canContinue = true;
+			}
+		}, 1000);
 	}
 	
 	init();
 
-	function updateContinueButton() {
-		const buttonText = isFinalStep() ? "Finish (" + continueTimer + "s)" : "Continue (" + continueTimer + "s)";
+	function updateContinueButton(seconds) {
+		const buttonText = 
+		isFinalStep() 
+		? "Finish" + (seconds == 0 ? "" : " (" + seconds + "s)")
+		: "Continue" + (seconds == 0 ? "" : " (" + seconds + "s)");
+		
 		$('.wiki-onboarding-continue').text(buttonText);
 	}
 
